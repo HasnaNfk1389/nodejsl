@@ -5,9 +5,9 @@ const bodyParser = require("body-parser");
 const response = require("./response");
 require("dotenv").config;
 const { createClient } = require("@supabase/supabase-js");
-const supabaseUrl = "https://vsvwjiglnhnmopyjhcql.supabase.co";
+const supabaseUrl = "https://dvhbkrmcoralcuvkpoyh.supabase.co";
 const supabaseAnonKey =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZzdndqaWdsbmhubW9weWpoY3FsIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTg4MTUxOTMsImV4cCI6MjAxNDM5MTE5M30.AraeroYB6zsrkfG70jPaSE7RHOh064RyUJnATw3e3ec";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2aGJrcm1jb3JhbGN1dmtwb3loIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTg4MTY0OTEsImV4cCI6MjAxNDM5MjQ5MX0.EVm69J6eHvVXksf0MpuYk_RtL8EWgsYRVtBage2fAjY";
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 const multer = require("multer");
 const upload = multer();
@@ -42,7 +42,7 @@ app.get("/getIDUser/:id", async (req, res) => {
 });
 
 app.post("/register", async (req, res) => {
-  const { name, email, password, phone, is_admin } = req.body;
+  const { name, email, password, phone, role, kelas } = req.body;
   try {
     const { data: checkEmail, error: checkEmailError } = await supabase
       .from("users")
@@ -64,12 +64,12 @@ app.post("/register", async (req, res) => {
       try {
         const { data: newUser, error: newUserError } = await supabase
           .from("users")
-          .insert({ name, email, password, phone, is_admin })
+          .insert({ name, email, password, phone, role, kelas })
           .select("*")
           .eq("email", email);
 
         if (newUserError) {
-          return response(500, null, "Internal Server Error", res);
+          return response(500, null, "Internal Server Error", res)
         }
         const responseUser = {
           isSuccess: "success",
@@ -288,6 +288,15 @@ app.put("/tugas/:id", upload.single("file"), async (req, res) => {
 //   console.log(data);
 //   return response(200, data, "Get all user success", res);
 // });
+
+app.get("/all_task", async (req, res) => {
+  const { data, error } = await supabase.from("tugas").select("*");
+  if (error) {
+    return response(500, null, error.message, res);
+  }
+  console.log(data);
+  return response(200, data, "Get all user success", res);
+});
 
 app.get("/all_materi", async (req, res) => {
   const { data, error } = await supabase.from("materi").select("*");
