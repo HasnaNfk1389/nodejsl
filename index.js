@@ -163,45 +163,29 @@ app.post("/login", async (req, res) => {
 // });
 
 app.post("/tugas", async (req, res) => {
-  const { nama_siswa, kelas, namatugas, tanggalmasuk, user_id } = req.body;
-  const file = req.file;
+  const { user_id, nama_siswa, kelas, tanggalmasuk, task_id } = req.body;
   try {
-    const { data: fileData, error: fileError } = await supabase.storage
-      .from("your-storage-bucket") // Replace with your Storage Bucket name
-      .upload(`materi/${file.originalname}`, file.buffer, {
-        cacheControl: "3600",
-        upsert: true,
-      });
+    const { data: newTugas, error } = await supabase
+      .from("tugas")
+      .insert([{ user_id, nama_siswa, kelas, tanggalmasuk, task_id }])
+      .select("*");
 
-    if (fileError) {
-      console.error("Error uploading file:", fileError);
+    if (error) {
+      console.error(error);
       return response(500, null, "Internal Server Error", res);
     }
 
-    const { data: newUser, error: newUserError } = await supabase
-      .from("tugas")
-      .insert({
-        nama_siswa,
-        kelas,
-        namatugas,
-        tanggalmasuk,
-        user_id,
-        file: fileData.Key,
-      })
-      .select("*");
-
-    if (newUserError) {
-      console.log(newUserError);
-      return response(500, "errorrrr", "Internal Server Error", res);
-    }
     const responseUser = {
       isSuccess: "success",
-      id: newUser[0].id,
-      messege: "Data berhasil ditambahkan",
+      id: newTugas[0].id,
+      message: "Tugas berhasil ditambahkan",
     };
 
-    return response(200, responseUser, "Data berhasil ditambahkan", res);
+    console.log(newTugas[0]);
+
+    return response(200, responseUser, "Tugas berhasil ditambahkan", res);
   } catch (error) {
+    console.error(error);
     return response(500, null, "Internal Server Error", res);
   }
 });
@@ -231,7 +215,7 @@ app.delete("/tugas/:id", async (req, res) => {
 
 app.put("/tugas/:id", upload.single("file"), async (req, res) => {
   const tugasId = req.params.id;
-  const { nama_siswa, namatugas, kelas, tanggalmasuk, user_id } = req.body;
+  const { nama_siswa, namatugas, kelas, desk_tugas, tanggalmasuk, user_id } = req.body;
   const file = req.file;
 
   try {
@@ -253,6 +237,7 @@ app.put("/tugas/:id", upload.single("file"), async (req, res) => {
         nama_siswa,
         namatugas,
         kelas,
+        desk_tugas,
         tanggalmasuk,
         user_id,
         file: fileData.key,
@@ -290,12 +275,21 @@ app.put("/tugas/:id", upload.single("file"), async (req, res) => {
 // });
 
 app.get("/all_task", async (req, res) => {
+  const { data, error } = await supabase.from("tugas_guru").select("*");
+  if (error) {
+    return response(500, null, error.message, res);
+  }
+  console.log(data);
+  return response(200, data, "Get all task success", res);
+});
+
+app.get("/semua_tugas", async (req, res) => {
   const { data, error } = await supabase.from("tugas").select("*");
   if (error) {
     return response(500, null, error.message, res);
   }
   console.log(data);
-  return response(200, data, "Get all user success", res);
+  return response(200, data, "Get all task success", res);
 });
 
 app.get("/all_materi", async (req, res) => {
