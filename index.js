@@ -359,6 +359,7 @@ app.post("/editMateriWithFile", async (req, res) => {
           deskripsi_materi: req.body.deskripsi_materi,
           file_metadata: req.body.file_desc,
           bucket_url: 'dvhbkrmcoralcuvkpoyh.supabase.co/storage/v1/object/public/file_materi/materi/'+req.body.file_desc.name,
+          kelas: req.body.kelas,
         }
       ])
       .eq('id',req.body.idcurrent)
@@ -393,6 +394,7 @@ app.post("/editMateri", async (req, res) => {
         {
           nama_materi: req.body.nama_materi,
           deskripsi_materi: req.body.deskripsi_materi,
+          kelas: req.body.kelas,
         }
       ])
       .eq('id',req.body.idcurrent)
@@ -440,6 +442,7 @@ app.post("/materi", async (req, res) => {
           deskripsi_materi: req.body.deskripsi_materi,
           file_metadata: req.body.file_desc,
           bucket_url: 'dvhbkrmcoralcuvkpoyh.supabase.co/storage/v1/object/public/file_materi/materi/'+req.body.file_desc.name,
+          kelas: req.body.kelas,
         }
       ]);
 
@@ -494,8 +497,8 @@ app.post("/deleteMateri", async (req, res) => {
 });
 
 
-app.get("/all_materi", async (req, res) => {
-  const { data, error } = await supabase.from("materi").select("*");
+app.get("/all_materi/:kelas", async (req, res) => {
+  const { data, error } = await supabase.from("materi").select("*").eq('kelas', req.params.kelas);
   if (error) {
     return response(500, null, error.message, res);
   }
