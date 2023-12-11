@@ -314,6 +314,186 @@ app.get("/semua_tugas", async (req, res) => {
   return response(200, data, "Get all task success", res);
 });
 
+
+
+// app.post('/materi', async (req, res) => {
+//   const {error} = await supabase
+//       .from('materi')
+//       .insert({
+//           nama_materi: req.body.nama_materi,
+//           deskripsi_materi: req.body.deskripsi_materi,
+//       })
+//   if (error) {
+//       res.send(error);
+//   }
+//   res.send("created!!");
+// });
+
+
+
+
+app.post("/editMateriWithFile", async (req, res) => {
+  // const fileContentBuffer = fs.readFileSync(req.body.file_content);
+  // const base64Content = fileContentBuffer.toString('base64');
+  try {
+    // Upload file to Supabase Storage
+    const { data: newMateri, error: uploadError } = await supabase
+      .storage
+      .from('file_materi')
+      .upload(req.body.path, Buffer.from(req.body.file_content,'base64'), {
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (uploadError) {
+      console.error("Supabase Storage Upload Error:", uploadError);
+      return response(500, null, "Internal Server Error (Storage Upload)", res);
+    }
+
+    // Insert data into 'materi' table
+    const { data: insertedData, error: insertError } = await supabase
+      .from('materi')
+      .update([
+        {
+          nama_materi: req.body.nama_materi,
+          deskripsi_materi: req.body.deskripsi_materi,
+          file_metadata: req.body.file_desc,
+          bucket_url: 'dvhbkrmcoralcuvkpoyh.supabase.co/storage/v1/object/public/file_materi/materi/'+req.body.file_desc.name,
+        }
+      ])
+      .eq('id',req.body.idcurrent)
+      .eq('user_id',req.body.useridcurrent)
+
+    if (insertError) {
+      console.error("Supabase Table Insert Error:", insertError);
+      return response(500, null, "Internal Server Error (Table Insert)", res);
+    }
+
+    const responseUser = {
+      isSuccess: "success",
+      // id: newMateri[0].id, // Assuming you want to use the ID from Supabase Storage
+      message: "Materi berhasil ditambahkan",
+    };
+
+    return response(200, responseUser, "Materi berhasil ditambahkan", res);
+  } catch (error) {
+    console.error("Unhandled Error:", error);
+    return response(500, null, "Internal Server Error", res);
+  }
+});
+
+
+app.post("/editMateri", async (req, res) => {
+  try {
+
+    // Insert data into 'materi' table
+    const { data: newMateri, error } = await supabase
+      .from('materi')
+      .update([
+        {
+          nama_materi: req.body.nama_materi,
+          deskripsi_materi: req.body.deskripsi_materi,
+        }
+      ])
+      .eq('id',req.body.idcurrent)
+      .eq('user_id',req.body.useridcurrent)
+
+
+    const responseUser = {
+      isSuccess: "success",
+      // id: newMateri[0].id,
+      message: "Materi berhasil ditambahkan",
+    };
+
+    return response(200, responseUser, "Materi berhasil ditambahkan", res);
+  } catch (error) {
+    console.error("Unhandled Error:", error);
+    return response(500, null, "Internal Server Error", res);
+  }
+});
+
+app.post("/materi", async (req, res) => {
+  // const fileContentBuffer = fs.readFileSync(req.body.file_content);
+  // const base64Content = fileContentBuffer.toString('base64');
+  try {
+    // Upload file to Supabase Storage
+    const { data: newMateri, error: uploadError } = await supabase
+      .storage
+      .from('file_materi')
+      .upload(req.body.path, Buffer.from(req.body.file_content,'base64'), {
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (uploadError) {
+      console.error("Supabase Storage Upload Error:", uploadError);
+      return response(500, null, "Internal Server Error (Storage Upload)", res);
+    }
+
+    // Insert data into 'materi' table
+    const { data: insertedData, error: insertError } = await supabase
+      .from('materi')
+      .insert([
+        {
+          user_id: req.body.user_id,
+          nama_materi: req.body.nama_materi,
+          deskripsi_materi: req.body.deskripsi_materi,
+          file_metadata: req.body.file_desc,
+          bucket_url: 'dvhbkrmcoralcuvkpoyh.supabase.co/storage/v1/object/public/file_materi/materi/'+req.body.file_desc.name,
+        }
+      ]);
+
+    if (insertError) {
+      console.error("Supabase Table Insert Error:", insertError);
+      return response(500, null, "Internal Server Error (Table Insert)", res);
+    }
+
+    const responseUser = {
+      isSuccess: "success",
+      // id: newMateri[0].id, // Assuming you want to use the ID from Supabase Storage
+      message: "Materi berhasil ditambahkan",
+    };
+
+    return response(200, responseUser, "Materi berhasil ditambahkan", res);
+  } catch (error) {
+    console.error("Unhandled Error:", error);
+    return response(500, null, "Internal Server Error", res);
+  }
+});
+
+
+
+app.post("/deleteMateri", async (req, res) => {
+  const {  } = req.body;
+  try {
+    const { data: newMateri, error } = await supabase
+    .from('materi')
+    .delete()
+    .eq('id', req.body.id)
+    .eq('user_id', req.body.user_id)
+    .eq('nama_materi', req.body.nama_materi)
+
+
+
+    if (error) {
+      console.error(error);
+      return response(500, null, "Internasl Server Error", res);
+    }
+
+    const responseUser = {
+      isSuccess: "success",
+      // id: newMateri[0].id,
+      message: "Materi berhasil ditambahkan",
+    };
+
+    return response(200, responseUser, "Materi berhasil ditambahkan", res);
+  } catch (error) {
+    console.error(error);
+    return response(500, null, "Insternal Server Error", res);
+  }
+});
+
+
 app.get("/all_materi", async (req, res) => {
   const { data, error } = await supabase.from("materi").select("*");
   if (error) {
@@ -323,31 +503,6 @@ app.get("/all_materi", async (req, res) => {
   return response(200, data, "Get all user success", res);
 });
 
-app.post("/materi", async (req, res) => {
-  const { judul, deskripsi } = req.body;
-  try {
-    const { data: newMateri, error } = await supabase
-      .from("materi")
-      .insert([{ judul, deskripsi }])
-      .select("*");
-
-    if (error) {
-      console.error(error);
-      return response(500, null, "Internal Server Error", res);
-    }
-
-    const responseUser = {
-      isSuccess: "success",
-      id: newMateri[0].id,
-      message: "Materi berhasil ditambahkan",
-    };
-
-    return response(200, responseUser, "Materi berhasil ditambahkan", res);
-  } catch (error) {
-    console.error(error);
-    return response(500, null, "Internal Server Error", res);
-  }
-});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

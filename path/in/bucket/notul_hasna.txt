@@ -1,0 +1,56 @@
+ADMIN
+- CRUD Guru, CRUD Admin, CRUD User => CONTROLLER AUTH
+- CRUD Materi => CONTROLLER MATERI
+- CRUD Task => CONTROLLER TASK
+- CRUD DetailTask => CONTROLLER TASK
+- CRD Kelas => 
+		id = 183918791893 
+		nama_kls = 12-IPS-1
+
+		id = 183918791893 
+		nama_kls = 12-IPS-2
+
+		id = 183918791893 
+		nama_kls = 12-IPS-3
+
+TEACHER
+- CRUD Materi => CONTROLLER MATERI
+- CRUD Task => CONTROLLER TASK
+- CRUD DetailTask => CONTROLLER TASK
+
+USER
+- Lihat dan Download Materi => CONTROLLER MATERI
+- CRD Task => CONTROLLER TASK
+
+=========================================================
+(m) kelas <> (m) guru
+
+kelas= 12-IPS-1
+kelas= 12-IPA-1
+
+db: users -> id, nama, email, phone, password, role, dp, kelas
+ashfjks, bu ani, ani@, 01939, 123, teacher, img.jpg, pilih db Kelas buatan admin (12-IPS-1 / 12-IPS-2)
+
+bikin regis guru
+
+db: materi -> id, judul, desc, filemateri 12IPS, kelas, 
+db: task -> id, namatugas, desc, tugas_kelas
+   824872, tugas 1 ips, ini tugas, 12-IPS-2
+ 
+db: detailtask -> id, idtask, iduser, nilai, filetugas, time_elapsed
+
+teacher: 
+user:
+admin: 
+
+============================================================= nulis bab 4 
+- mind mapping 
+- model arsitektur Full (SOA, Cloud, RESTfull API)
+- functional (RESTfull API) 
+
+===============================================================
+
+-fungsi utama jalan dulu (input) (output)
+- gausa data crud 
+
+===============================================================
