@@ -15,7 +15,7 @@ const bucketName = 'file_materi';
 const filePath = 'path/in/bucket/notul_hasna.txt';
 const fileContents = require('fs').readFileSync(filePath);
 
-
+app.use(bodyParser.json());
 
 supabase.storage
     .from(bucketName)
