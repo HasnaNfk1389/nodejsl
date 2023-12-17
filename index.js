@@ -14,7 +14,57 @@ const upload = multer();
 const bucketName = 'file_materi';
 const filePath = 'path/in/bucket/notul_hasna.txt';
 const fileContents = require('fs').readFileSync(filePath);
+const {google} = require('google');
+const {OAuth2Client} = require ('google-auth-library');
 
+// Replace with your Google API credentials
+const credentials = require('./path/to/your/credentials.json');
+
+// Replace with the calendar ID you want to add events to
+const calendarId = 'https://calendar.google.com/calendar/embed?src=hasnanfk%40upi.edu&ctz=Asia%2FJakarta';
+
+// Function to authorize and add an event to Google Calendar
+async function addEventToCalendar(eventData) {
+  const oAuth2Client = new OAuth2Client(
+    credentials.installed.client_id,
+    credentials.installed.client_secret,
+    credentials.installed.redirect_uris[0]
+  );
+
+  oAuth2Client.setCredentials({
+    access_token: '384220710070-ej9oequc06orp6buokpqv2pj84vbrhm2.apps.googleusercontent.com', // Replace with the access token
+    refresh_token: 'your-refresh-token', // Replace with the refresh token
+  });
+
+  const calendar = google.calendar({ version: 'v3', auth: oAuth2Client });
+
+  try {
+    const event = await calendar.events.insert({
+      calendarId,
+      resource: {
+        summary: eventData.nama_siswa,
+        start: { dateTime: eventData.tanggalmasuk },
+        end: { dateTime: eventData.tanggalmasuk },
+        description: Kelas: ${eventData.kelas}\nTask ID: ${eventData.task_id},
+      },
+    });
+
+    console.log('Event added:', event.data);
+  } catch (error) {
+    console.error('Google Calendar API Error:', error);
+  }
+}
+
+// Usage example
+const eventData = {
+  nama_siswa: 'John Doe',
+  tanggalmasuk: '2023-12-17T10:00:00', // Replace with the actual date and time
+  kelas: 'Class A',
+  task_id: '12345',
+};
+
+addEventToCalendar(eventData);
+ 
 app.use(bodyParser.json());
 
 supabase.storage
