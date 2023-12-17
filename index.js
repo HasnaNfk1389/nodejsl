@@ -17,29 +17,6 @@ const fileContents = require('fs').readFileSync(filePath);
 
 app.use(bodyParser.json());
 
-supabase.storage
-    .from(bucketName)
-    .upload('path/in/bucket/notul_hasna.txt', fileContents, {
-        contentType: 'text/plain', // Sesuaikan dengan tipe file Anda
-    })
-    .then((response) => {
-        if (response.status === 201) {
-            // File diunggah dengan sukses
-            console.log('File diunggah:', response.data.Key);
-        } else {
-            // Tangani kesalahan
-            console.error('Upload gagal:', response.error);
-        }
-    })
-    .catch((error) => {
-        // Tangani kesalahan lainnya
-        console.error('Error:', error);
-    });
-
-app.get("/hello", (req, res) => {
-  res.send("Hello World!");
-  console.log(supabase);
-});
 
 app.get("/get", async (req, res) => {
   const { data, error } = await supabase.from("users").select("*");
