@@ -17,7 +17,6 @@ const fileContents = require('fs').readFileSync(filePath);
 
 app.use(bodyParser.json());
 
-
 app.get("/get", async (req, res) => {
   const { data, error } = await supabase.from("users").select("*");
   if (error) {
