@@ -38,22 +38,7 @@ async function addEventToCalendar(eventData) {
 
   const calendar = google.calendar({ version: 'v3', auth: oAuth2Client });
 
-  try {
-    const event = await calendar.events.insert({
-      calendarId,
-      resource: {
-        summary: eventData.nama_siswa,
-        start: { dateTime: eventData.tanggalmasuk },
-        end: { dateTime: eventData.tanggalmasuk },
-        description: Kelas: ${eventData.kelas}\nTask ID: ${eventData.task_id},
-      },
-    });
-
-    console.log('Event added:', event.data);
-  } catch (error) {
-    console.error('Google Calendar API Error:', error);
-  }
-}
+  
 
 // Usage example
 const eventData = {
@@ -1017,3 +1002,4 @@ app.listen(PORT, () => {
 //     return response(500, null, "Internal Server Error", res);
 //   }
 // });
+}
