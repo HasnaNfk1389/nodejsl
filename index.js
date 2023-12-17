@@ -553,6 +553,15 @@ app.put("/tugas/:id", upload.single("file"), async (req, res) => {
 // });
 
 
+app.get("/checkUser/:user_id", async (req, res) => {
+  const { data, error } = await supabase.from("users").select("*").eq('id',req.params.user_id);
+  if (error) {
+    return response(500, null, error.message, res);
+  }
+  console.log(data);
+  return response(200, data, "Get all task success", res);
+});
+
 
 app.get("/allSubmittedTask/:class", async (req, res) => {
   const { data, error } = await supabase.from("tugas").select("*").eq('kelas',req.params.class);
@@ -683,6 +692,37 @@ app.post("/editMateriWithFile", async (req, res) => {
   }
 });
 
+
+
+
+app.post("/profileUpdate", async (req, res) => {
+  try {
+
+    // Insert data into 'materi' table
+    const { data: newMateri, error } = await supabase
+      .from('users')
+      .update([
+        {
+          name:req.body.username,
+          phone:req.body.phone,
+          password:req.body.password,
+        }
+      ])
+      .eq('id',req.body.userid)
+
+
+    const responseUser = {
+      isSuccess: "success",
+      // id: newMateri[0].id,
+      message: "Materi berhasil ditambahkan",
+    };
+
+    return response(200, responseUser, "Materi berhasil ditambahkan", res);
+  } catch (error) {
+    console.error("Unhandled Error:", error);
+    return response(500, null, "Internal Server Error", res);
+  }
+});
 
 
 app.post("/addScore", async (req, res) => {
