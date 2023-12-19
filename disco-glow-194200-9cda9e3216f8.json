@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "disco-glow-194200",
+  "private_key_id": "9cda9e3216f8011234a5121c7f963494009d5ee2",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDFK8d6TZJ/Im89\ncUmBPT+zhtB9evoPX37enFGOHegpN/lMXd0ctL+qAMwATB3sVBJJ0QvkJv6ZH9iE\ns/3y9pfNECX/b1RfzFuwJTyWm+LeBus/sNTtYUUFkSBsydArzWi3GUpKZ2TF2/m7\n9IBtx5lr0rN1kZ4/y3uTEvYOeAUBxiPefEPQ6+GWLDAx6rPi5269lcBZX/tEPfwV\nQmJq8MJe2OpysOV6+6v4phymt8LePqB9uEkbZ2vUrq/ML14zk/mQCaHJpQq+l7/P\nFlbbCsS7bFV7R+hoqRhXQH42vo7mUGepMcRC6HVDACYmkUqx1qOrO53DnAD9p7MQ\nCSQjQ6tlAgMBAAECggEALB7Mx1BebLZ+3+few925yGltc/a1yATddeDS2xNUJQ0S\nawVB+i90CA2fmJ1vwLdbVEtD9uzG4erfX2qLc/e8JjXr2snFvp4TEkpy0VzWmkpA\nEAN40hmHAWTlNZK/U13mhbpSBm42fZPowSdIKciVSyxd3fwUxj+5SkLe7oPq0udn\njNckQbMdDnk7+6jYW2bWujyUk3Wt/Rf1h6NYmH4clmuwMOlFBa6W7sUJ/CrmL9fg\nYl+3TThw3IWx+3eRPg+QOm/5oatT7YVtZTjdCkecnwxh4pOJknknQePYCjeiJ8Ue\noSmdiNRpWYH3nZrasrl27rVRuRjM/0Ogvb6zBlRdzQKBgQD32esjH43lBMaWTkW0\nKsijWQS9wx9tAt7DFMTtqP0pF85AiK1PrbvaCGHkRRxiDw5UHDRgSYMyAgH/QI7z\n+qS0iGmYGImC6FTgmFiacZpJ0g+Pny8SV0T8V65wna9OwbjWXmpz1CFw7DvtwI+R\nf0drWvFS5OyHzkWFcXYCwr2ClwKBgQDLp01TKZVzQxlpsZCTEMLZRPtyIilq/0PX\nBoPFccvZTHu4D5cBuAdoRJT+8hi+qP4f09YZt3v5W0wPFk8kdIRlTpCfXsz7t035\nye4ae4xBVBL3xMkBQVTbaI1kuOxmnC6TtrDIeTeksi5Itdg9zf1TBOQco0EYFzrv\nkoob//uNYwKBgQDRvswbZCeriPgZ2NFqH869VacKg+bDVOt5QclJqnnbXbcAq+mn\nBUp0wCU/jTDw1vb0PQ4h8fQhzMst3M9dL15VHR/nQ9STQNQbYTGSOdMs56SdkUO/\njLTnq7gGu5rQ1mX6m9oQfZNzQaeRkySsJ38kHckdsndskiYJQLRyr6S6rwKBgEKF\neHWErMOElGV40a+oFu1fYf7K99pyXRd8kkhJPnvRRsw9k2bFVO4TENQiAkEs9C0z\nRckKrR0rXDHFaL6QrLpmqkjUb4J9QqQn+HWAC7U/IB78kWeujmhIw362BMoTlAc9\n8orZRXqvlPy9IVA229tlSpmsHdQfqmmc5S32NJXfAoGBAN0HzYPiMIxzFeOUgg+H\nn1B8fVeSy86vdVh2mvjzKgCrfALJd8uFYb8TS37OiB9ICndpxeXbYubDqDYqX1la\nSVpINjE3iKjqEwEjBEB4nowW2r91rPQ2zM81S/s0o9AvEBRASLUzjN4ZDGcWE4E9\nf96ifC7HgIiV8X20nB5O/oIu\n-----END PRIVATE KEY-----\n",
+  "client_email": "lmscalendar@disco-glow-194200.iam.gserviceaccount.com",
+  "client_id": "102974178487078258510",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/lmscalendar%40disco-glow-194200.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
