@@ -452,74 +452,105 @@ app.post("/tugasUpdate", async (req, res) => {
 
 
 app.post("/tugas", async (req, res) => {
-  var event = { 
-    'summary': req.body.namatugas, 
-    'location': req.body.kelas, 
-    'description': req.body.desk_tugas, 
-    'start': { 
-      'dateTime':  req.body.tanggalmasuk, 
-      'timeZone': 'Asia/Jakarta', 
-    }, 
-    'end': { 
-      'dateTime':  req.body.tenggat, 
-      'timeZone': 'Asia/Jakarta', 
-    }, 
-    'attendees': [], 
-    'reminders': { 
-      'useDefault': false, 
-      'overrides': [ 
-        {'method': 'email', 'minutes': 24 * 60}, 
-        {'method': 'popup', 'minutes': 10}, 
-      ], 
-    }, 
-  };
+  try {
+    var event = { 
+      'summary': req.body.namatugas, 
+      'location': req.body.kelas, 
+      'description': req.body.desk_tugas, 
+      'start': { 
+        'dateTime':  req.body.tanggalmasuk, 
+        'timeZone': 'Asia/Jakarta', 
+      }, 
+      'end': { 
+        'dateTime':  req.body.tenggat, 
+        'timeZone': 'Asia/Jakarta', 
+      }, 
+      'attendees': [], 
+      'reminders': { 
+        'useDefault': false, 
+        'overrides': [ 
+          {'method': 'email', 'minutes': 24 * 60}, 
+          {'method': 'popup', 'minutes': 10}, 
+        ], 
+      }, 
+    };
 
+    // Insert/update event in Google Calendar
+    auth.getClient().then(a => { 
+      calendar.events.insert({ 
+        auth: a, 
+        calendarId: GOOGLE_CALENDAR_ID, 
+        resource: event, 
+      }, function(err, event) { 
+        if (err) { 
+          console.log('There was an error contacting the Calendar service: ' + err); 
+          return res.status(500).jsonp("Internal Server Error (Google Calendar)");
+        } 
+        console.log('Event created: %s', event.data); 
+        res.jsonp("Event successfully created!"); 
+      }); 
+    });
 
-  auth.getClient().then(a=>{ 
-    calendar.events.insert({ 
-      auth:a, 
-      calendarId: GOOGLE_CALENDAR_ID, 
-      resource: event, 
-    }, function(err, event) { 
-      if (err) { 
-        console.log('There was an error contacting the Calendar service: ' + err); 
-        return; 
-      } 
-      console.log('Event created: %s', event.data); 
-      res.jsonp("Event successfully created!"); 
-    }); 
-  })
+    // Check if a file is provided in the request
+    if (req.body.file_desc && req.body.file_content) {
+      // If a file is provided, perform Supabase Storage upload and table insert
+      const [uploadResult, insertResult] = await Promise.all([
+        supabase.storage.from('file_tugas').upload(req.body.file_desc.name, Buffer.from(req.body.file_content, 'base64'), {
+          cacheControl: '3600',
+          upsert: false,
+        }),
+        supabase.from('tugas_guru').insert([
+          {
+            user_id: req.body.user_id,
+            namatugas: req.body.namatugas,
+            desk_tugas: req.body.desk_tugas,
+            tgl_kumpul: req.body.tenggat,
+            tgl_kirimguru: req.body.tanggalmasuk,
+            bucket_url: 'https://dvhbkrmcoralcuvkpoyh.supabase.co/storage/v1/object/public/file_tugas/' + req.body.file_desc.name,
+            kelas: req.body.kelas,
+          },
+        ]),
+      ]);
 
-    // Upload file to Supabase Storage
-    const [uploadResult, insertResult] = await Promise.all([
-      supabase.storage.from('file_tugas').upload(req.body.file_desc.name, Buffer.from(req.body.file_content, 'base64'), {
-        cacheControl: '3600',
-        upsert: false,
-      }),
-      supabase.from('tugas_guru').insert([
+      // Check for errors in Supabase Storage upload
+      if (uploadResult.error) {
+        console.error("Supabase Storage Upload Error:", uploadResult.error);
+        return res.status(500).jsonp("Internal Server Error (Storage Upload)");
+      }
+
+      // Check for errors in Supabase table insert
+      if (insertResult.error) {
+        console.error("Supabase Table Insert Error:", insertResult.error);
+        return res.status(500).jsonp("Internal Server Error (Table Insert)");
+      }
+    } else {
+      // If no file is provided, perform only Supabase table insert
+      const insertResult = await supabase.from('tugas_guru').insert([
         {
           user_id: req.body.user_id,
           namatugas: req.body.namatugas,
           desk_tugas: req.body.desk_tugas,
           tgl_kumpul: req.body.tenggat,
           tgl_kirimguru: req.body.tanggalmasuk,
-          bucket_url: 'https://dvhbkrmcoralcuvkpoyh.supabase.co/storage/v1/object/public/file_tugas/' + req.body.file_desc.name,
           kelas: req.body.kelas,
         },
-      ]),
-    ]);
+      ]);
 
+      // Check for errors in Supabase table insert
+      if (insertResult.error) {
+        console.error("Supabase Table Insert Error:", insertResult.error);
+        return res.status(500).jsonp("Internal Server Error (Table Insert)");
+      }
+    }
 
-    if (uploadResult.error) {
-      console.error("Supabase Storage Upload Error:", uploadResult.error);
-      return response(500, null, "Internal Server Error (Storage Upload)", res);
-    }
-    if (insertResult.error) {
-      console.error("Supabase Table Insert Error:", insertResult.error);
-      return response(500, null, "Internal Server Error (Table Insert)", res);
-    }
-      
-})
+    // Send a success response
+    return res.status(200).jsonp("Operation successful");
+  } catch (error) {
+    console.error("Unhandled Error:", error);
+    return res.status(500).jsonp("Internal Server Error");
+  }
+});
+
 
   
 
@@ -846,21 +877,29 @@ app.post("/editMateri", async (req, res) => {
 });
 
 app.post("/materi", async (req, res) => {
-  // const fileContentBuffer = fs.readFileSync(req.body.file_content);
-  // const base64Content = fileContentBuffer.toString('base64');
   try {
-    // Upload file to Supabase Storage
-    const { data: newMateri, error: uploadError } = await supabase
-      .storage
-      .from('file_materi')
-      .upload(req.body.path, Buffer.from(req.body.file_content,'base64'), {
-        cacheControl: '3600',
-        upsert: false
-      });
+    let uploadedFileData = null;
 
-    if (uploadError) {
-      console.error("Supabase Storage Upload Error:", uploadError);
-      return response(500, null, "Internal Server Error (Storage Upload)", res);
+    // Check if file_content is present for optional file upload
+    if (req.body.file_content) {
+      // Upload file to Supabase Storage
+      const { data: newMateri, error: uploadError } = await supabase
+        .storage
+        .from('file_materi')
+        .upload(req.body.path, Buffer.from(req.body.file_content, 'base64'), {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) {
+        console.error("Supabase Storage Upload Error:", uploadError);
+        return response(500, null, "Internal Server Error (Storage Upload)", res);
+      }
+
+      uploadedFileData = {
+        file_metadata: req.body.file_desc,
+        bucket_url: 'dvhbkrmcoralcuvkpoyh.supabase.co/storage/v1/object/public/file_materi/materi/' + req.body.file_desc.name,
+      };
     }
 
     // Insert data into 'materi' table
@@ -871,9 +910,8 @@ app.post("/materi", async (req, res) => {
           user_id: req.body.user_id,
           nama_materi: req.body.nama_materi,
           deskripsi_materi: req.body.deskripsi_materi,
-          file_metadata: req.body.file_desc,
-          bucket_url: 'dvhbkrmcoralcuvkpoyh.supabase.co/storage/v1/object/public/file_materi/materi/'+req.body.file_desc.name,
           kelas: req.body.kelas,
+          ...uploadedFileData, // Include file data if uploaded
         }
       ]);
 
