@@ -343,46 +343,66 @@ app.post("/studentTugasUpdate", async (req, res) => {
 
 
 app.post("/tugasUpdate", async (req, res) => {
- 
-    var event = { 
-      'summary': req.body.namatugas, 
-      'location': req.body.kelas, 
-      'description': req.body.desk_tugas, 
-      'start': { 
-        'dateTime':  req.body.tanggalmasuk, 
-        'timeZone': 'Asia/Jakarta', 
-      }, 
-      'end': { 
-        'dateTime':  req.body.tenggat, 
-        'timeZone': 'Asia/Jakarta', 
-      }, 
-      'attendees': [], 
-      'reminders': { 
-        'useDefault': false, 
-        'overrides': [ 
-          {'method': 'email', 'minutes': 24 * 60}, 
-          {'method': 'popup', 'minutes': 10}, 
-        ], 
-      }, 
-    };
-  
-  
-    auth.getClient().then(a=>{ 
-      calendar.events.insert({ 
-        auth:a, 
-        calendarId: GOOGLE_CALENDAR_ID, 
-        resource: event, 
-      }, function(err, event) { 
-        if (err) { 
-          console.log('There was an error contacting the Calendar service: ' + err); 
-          return; 
-        } 
-        console.log('Event created: %s', event.data); 
-        res.jsonp("Event successfully created!"); 
-      }); 
-    })
+  try {
+    // Retrieve the existing event_id from Supabase
+    const { data: existingEvent } = await supabase
+      .from('tugas_guru')
+      .select('event_id')
+      .eq('id', req.body.task_id)
+      .single();
 
-    const [uploadResult, insertResult] = await Promise.all([
+    if (!existingEvent) {
+      return res.status(404).jsonp("Task not found");
+    }
+
+    var event = {
+      'summary': req.body.namatugas,
+      'location': req.body.kelas,
+      'description': req.body.desk_tugas,
+      'start': {
+        'dateTime': req.body.tanggalmasuk,
+        'timeZone': 'Asia/Jakarta',
+      },
+      'end': {
+        'dateTime': req.body.tenggat,
+        'timeZone': 'Asia/Jakarta',
+      },
+      'attendees': [],
+      'reminders': {
+        'useDefault': false,
+        'overrides': [
+          {'method': 'email', 'minutes': 24 * 60},
+          {'method': 'popup', 'minutes': 10},
+        ],
+      },
+    };
+
+    // Update event in Google Calendar
+    const a = await auth.getClient();
+    calendar.events.update({
+      auth: a,
+      calendarId: GOOGLE_CALENDAR_ID,
+      eventId: existingEvent.event_id,
+      resource: event,
+    }, (err, updatedEvent) => {
+      if (err) {
+        console.log('There was an error contacting the Calendar service:', err);
+        return res.status(500).jsonp("Internal Server Error (Google Calendar)");
+      }
+      console.log('Event updated:', updatedEvent.data);
+      // Continue with the rest of your code
+      updateSupabaseAndRespond(req, res);
+    });
+
+  } catch (error) {
+    console.error("Unhandled Error:", error);
+    return res.status(500).jsonp("Internal Server Error");
+  }
+});
+
+async function updateSupabaseAndRespond(req, res) {
+  try {
+    const [uploadResult, updateResult] = await Promise.all([
       supabase.storage.from('file_tugas').upload(req.body.file_desc.name, Buffer.from(req.body.file_content, 'base64'), {
         cacheControl: '3600',
         upsert: false,
@@ -393,22 +413,33 @@ app.post("/tugasUpdate", async (req, res) => {
           desk_tugas: req.body.desk_tugas,
           tgl_kumpul: req.body.tenggat,
           tgl_kirimguru: req.body.tanggalmasuk,
-          bucket_url: 'https://dvhbkrmcoralcuvkpoyh.supabase.co/storage/v1/object/public/file_tugas/'+req.body.file_desc.name,
+          bucket_url: 'https://dvhbkrmcoralcuvkpoyh.supabase.co/storage/v1/object/public/file_tugas/' + req.body.file_desc.name,
           kelas: req.body.kelas,
         }
       ])
-      .eq('id',req.body.task_id),
+      .eq('id', req.body.task_id),
     ]);
-      if (uploadResult.error) {
-        console.error("Supabase Storage Upload Error:", uploadResult.error);
-        return response(500, null, "Internal Server Error (Storage Upload)", res);
-      }
-      if (insertResult.error) {
-        console.error("Supabase Table Insert Error:", insertResult.error);
-        return response(500, null, "Internal Server Error (Table Insert)", res);
-      }
+
+    // Check for errors in Supabase Storage upload
+    if (uploadResult.error) {
+      console.error("Supabase Storage Upload Error:", uploadResult.error);
+      return res.status(500).jsonp("Internal Server Error (Storage Upload)");
     }
-)
+
+    // Check for errors in Supabase table update
+    if (updateResult.error) {
+      console.error("Supabase Table Update Error:", updateResult.error);
+      return res.status(500).jsonp("Internal Server Error (Table Update)");
+    }
+
+    // Send a success response
+    return res.status(200).jsonp("Operation successful");
+  } catch (error) {
+    console.error("Unhandled Error:", error);
+    return res.status(500).jsonp("Internal Server Error");
+  }
+}
+
 
 // function upload_tanggal(judul, lokasi, deskripsi, start, end){
 //   var event = { 
@@ -453,43 +484,40 @@ app.post("/tugasUpdate", async (req, res) => {
 
 app.post("/tugas", async (req, res) => {
   try {
-    var event = { 
-      'summary': req.body.namatugas, 
-      'location': req.body.kelas, 
-      'description': req.body.desk_tugas, 
-      'start': { 
-        'dateTime':  req.body.tanggalmasuk, 
-        'timeZone': 'Asia/Jakarta', 
-      }, 
-      'end': { 
-        'dateTime':  req.body.tenggat, 
-        'timeZone': 'Asia/Jakarta', 
-      }, 
-      'attendees': [], 
-      'reminders': { 
-        'useDefault': false, 
-        'overrides': [ 
-          {'method': 'email', 'minutes': 24 * 60}, 
-          {'method': 'popup', 'minutes': 10}, 
-        ], 
-      }, 
+    var event = {
+      'summary': req.body.namatugas,
+      'location': req.body.kelas,
+      'description': req.body.desk_tugas,
+      'start': {
+        'dateTime': req.body.tanggalmasuk,
+        'timeZone': 'Asia/Jakarta',
+      },
+      'end': {
+        'dateTime': req.body.tenggat,
+        'timeZone': 'Asia/Jakarta',
+      },
+      'attendees': [],
+      'reminders': {
+        'useDefault': false,
+        'overrides': [
+          {'method': 'email', 'minutes': 24 * 60},
+          {'method': 'popup', 'minutes': 10},
+        ],
+      },
     };
 
     // Insert/update event in Google Calendar
-    auth.getClient().then(a => { 
-      calendar.events.insert({ 
-        auth: a, 
-        calendarId: GOOGLE_CALENDAR_ID, 
-        resource: event, 
-      }, function(err, event) { 
-        if (err) { 
-          console.log('There was an error contacting the Calendar service: ' + err); 
-          return res.status(500).jsonp("Internal Server Error (Google Calendar)");
-        } 
-        console.log('Event created: %s', event.data); 
-        res.jsonp("Event successfully created!"); 
-      }); 
+    const a = await auth.getClient();
+    const eventResponse = await calendar.events.insert({
+      auth: a,
+      calendarId: GOOGLE_CALENDAR_ID,
+      resource: event,
     });
+
+    // Extract event ID from the response
+    const eventId = eventResponse.data.id;
+
+    console.log('Event created:', eventResponse.data);
 
     // Check if a file is provided in the request
     if (req.body.file_desc && req.body.file_content) {
@@ -508,6 +536,7 @@ app.post("/tugas", async (req, res) => {
             tgl_kirimguru: req.body.tanggalmasuk,
             bucket_url: 'https://dvhbkrmcoralcuvkpoyh.supabase.co/storage/v1/object/public/file_tugas/' + req.body.file_desc.name,
             kelas: req.body.kelas,
+            event_id: eventId,
           },
         ]),
       ]);
@@ -533,6 +562,7 @@ app.post("/tugas", async (req, res) => {
           tgl_kumpul: req.body.tenggat,
           tgl_kirimguru: req.body.tanggalmasuk,
           kelas: req.body.kelas,
+          event_id: eventId,
         },
       ]);
 
@@ -966,34 +996,62 @@ app.post("/deleteTugas", async (req, res) => {
 
 
 app.post("/deleteTask", async (req, res) => {
-  const {  } = req.body;
-
   try {
-    const { data: newMateri, error } = await supabase
-    .from('tugas_guru')
-    .delete()
-    .eq('id', req.body.task_id)
-    .eq('user_id', req.body.user_id)
+    // Check if the task exists in Supabase
+    const { data: existingEvent, error: existingEventError } = await supabase
+      .from('tugas_guru')
+      .select('event_id')
+      .eq('id', req.body.task_id)
+      .single();
 
-
-
-    if (error) {
-      console.error(error);
-      return response(500, null, "Internasl Server Error", res);
+    if (existingEventError) {
+      console.error("Supabase Query Error:", existingEventError);
+      return response(500, null, "Internal Server Error (Supabase Query)", res);
     }
 
-    const responseUser = {
-      isSuccess: "success",
-      // id: newMateri[0].id,
-      message: "Materi berhasil ditambahkan",
-    };
+    // If the task doesn't exist, return a 404 response
+    if (!existingEvent) {
+      return res.status(404).jsonp("Task not found");
+    }
 
-    return response(200, responseUser, "Materi berhasil ditambahkan", res);
+    // Delete the event from Google Calendar
+    const a = await auth.getClient();
+    calendar.events.delete({
+      auth: a,
+      calendarId: GOOGLE_CALENDAR_ID,
+      eventId: existingEvent.event_id,
+    }, async (deleteErr) => {
+      if (deleteErr) {
+        console.log('Error deleting event:', deleteErr);
+        return res.status(500).jsonp("Internal Server Error (Google Calendar)");
+      }
+
+      // Delete the task record from Supabase
+      const { error: supabaseDeleteError } = await supabase
+        .from('tugas_guru')
+        .delete()
+        .eq('id', req.body.task_id)
+        .eq('user_id', req.body.user_id);
+
+      if (supabaseDeleteError) {
+        console.error("Supabase Delete Error:", supabaseDeleteError);
+        return response(500, null, "Internal Server Error (Supabase Delete)", res);
+      }
+
+      // Respond with success
+      const responseUser = {
+        isSuccess: true,
+        message: "Task successfully deleted",
+      };
+
+      return response(200, responseUser, "Task successfully deleted", res);
+    });
   } catch (error) {
-    console.error(error);
-    return response(500, null, "Insternal Server Error", res);
+    console.error("Unhandled Error:", error);
+    return response(500, null, "Internal Server Error", res);
   }
 });
+
 
 app.post("/deleteMateri", async (req, res) => {
   const {  } = req.body;
