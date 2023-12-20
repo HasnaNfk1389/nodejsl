@@ -75,7 +75,7 @@ app.get('/calendar', (req, res) => {
 
 
 const auth = new google.auth.GoogleAuth({ 
-  keyFile: 'C:/xampp/htdocs/Laravel/nodejsl/disco-glow-194200-9cda9e3216f8.json', 
+  keyFile: './disco-glow-194200-9cda9e3216f8.json', 
   scopes: 'https://www.googleapis.com/auth/calendar', //full access to edit calendar 
 }); 
 
@@ -702,6 +702,17 @@ app.get("/allSubmittedTask/:class/:user_id", async (req, res) => {
   console.log(data);
   return response(200, data, "Get all task success", res);
 });
+
+
+app.get("/allMateri/", async (req, res) => {
+  const { data, error } = await supabase.from("materi").select("*");
+  if (error) {
+    return response(500, null, error.message, res);
+  }
+  console.log(data);
+  return response(200, data, "Get all task success", res);
+});
+
 
 app.get("/allTask/:class", async (req, res) => {
   const { data, error } = await supabase.from("tugas_guru").select("*").eq('kelas',req.params.class);
