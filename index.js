@@ -35,7 +35,7 @@ const SCOPES = 'https://www.googleapis.com/auth/calendar.readonly';
 const GOOGLE_PRIVATE_KEY="9cda9e3216f8011234a5121c7f963494009d5ee2"
 const GOOGLE_CLIENT_EMAIL = "lmscalendar@disco-glow-194200.iam.gserviceaccount.com"
 const GOOGLE_PROJECT_NUMBER = "1096867220972"
-const GOOGLE_CALENDAR_ID = "2ce6cde01b5f1b7d0c9f90cfcc20b198b696c546b2ab34acace2495945afce28@group.calendar.google.com"
+const GOOGLE_CALENDAR_ID = "3845452da0259e35908a3ff5822641c0ba2297f5d501d5b9bc206746a4fd9b37@group.calendar.google.com"
   
   
 const jwtClient = new google.auth.JWT( 
